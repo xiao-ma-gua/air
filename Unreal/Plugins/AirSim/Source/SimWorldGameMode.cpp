@@ -1188,7 +1188,9 @@ bool ASimWorldGameMode::GetSettingsText(std::string& settingsText)
 {
     return (GetSettingsTextFromCommandLine(settingsText) ||
             ReadSettingsTextFromFile(FPaths::Combine(FPaths::ProjectDir(), TEXT("settings.json")), settingsText) ||
-            ReadSettingsTextFromFile(UTF8_TO_TCHAR(msr::airlib::Settings::getExecutableFullPath("settings.json").c_str()), settingsText) ||
+            // 避免使用 libAirLib 的 getExecutableFullPath：其 readlink 会忽略返回值，
+            // 且从不为缓冲区添加 NUL 结尾，从而导致路径损坏。
+            ReadSettingsTextFromFile(FPaths::Combine(FPlatformProcess::GetModulesDirectory(), TEXT("settings.json")), settingsText) ||
             ReadSettingsTextFromFile(GetLaunchPath("settings.json"), settingsText) ||
             ReadSettingsTextFromFile(UTF8_TO_TCHAR(msr::airlib::Settings::Settings::getUserDirectoryFullPath("settings.json").c_str()), settingsText));
 }
